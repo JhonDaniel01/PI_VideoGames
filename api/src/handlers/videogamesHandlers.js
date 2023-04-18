@@ -4,8 +4,8 @@ const getVideogamesIdHandler= (req,res)=>{
     // El videojuego es recibido por parámetro (ID).
     // Tiene que incluir los datos del género del videojuego al que está asociado.
     // Debe funcionar tanto para los videojuegos de la API como para los de la base de datos.
-    const {id}=req.params;
-    res.send(`Esta ruta trae los datos del juego con el id: ${id} recibido por parametro`)
+    const {idVideogame}=req.params;
+    res.send(`Esta ruta trae los datos del juego con el id: ${idVideogame} recibido por parametro`)
 }
 
 
@@ -28,7 +28,10 @@ const postVideogamesHandler= (req,res)=>{
     // Esta ruta recibirá todos los datos necesarios para crear un videojuego y relacionarlo con sus géneros solicitados.
     // Toda la información debe ser recibida por body.
     // Debe crear un videojuego en la base de datos, y este debe estar relacionado con sus géneros indicados (al menos uno).
-    res.send("Esta ruta crea un video juego en la base de datos")
+    const {name,description,plataform,image,date, rating,genre}=req.body;
+    res.send(`Esta ruta crea un video juego en la base de datos
+       Name ${name}, description ${description},plataform ${plataform},image ${image},date ${date}, rating ${rating},genre ${genre}
+    `)
 }
 
 module.exports={
