@@ -1,4 +1,4 @@
-
+const {createVideogame}=require("../controllers/videogamesControllers")
 const getVideogamesIdHandler= (req,res)=>{
     // Esta ruta obtiene el detalle de un videojuego específico. Es decir que devuelve un objeto con la información pedida en el detalle de un videojuego.
     // El videojuego es recibido por parámetro (ID).
@@ -23,15 +23,19 @@ const getVideogamesHandler = (req,res)=>{
         res.send("Esta ruta trae los todos los video juegos")
     }
 }
-const postVideogamesHandler= (req,res)=>{
+const postVideogamesHandler= async (req,res)=>{
     // POST | /videogames
     // Esta ruta recibirá todos los datos necesarios para crear un videojuego y relacionarlo con sus géneros solicitados.
     // Toda la información debe ser recibida por body.
     // Debe crear un videojuego en la base de datos, y este debe estar relacionado con sus géneros indicados (al menos uno).
-    const {name,description,plataform,image,date, rating,genre}=req.body;
-    res.send(`Esta ruta crea un video juego en la base de datos
-       Name ${name}, description ${description},plataform ${plataform},image ${image},date ${date}, rating ${rating},genre ${genre}
-    `)
+    const {name,description,platforms,background_image,released, rating,genres}=req.body;
+    
+        try {
+        const newVideogame= await createVideogame({name,description,platforms,background_image,released, rating,genres});
+        res.status(201).json(newVideogame);
+    } catch (error) {
+        res.status(500).json({error:error.message})
+    }
 }
 
 module.exports={
