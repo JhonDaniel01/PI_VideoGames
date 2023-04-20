@@ -1,7 +1,8 @@
 const {Videogame}=require("../db")
 
-const createVideogame=async(videogame)=>{
-    const newVideogame= await Videogame.create(videogame);
+const createVideogame=async(name,description,platforms,background_image,released, rating,genres)=>{
+    const newVideogame= await Videogame.create({name,description,platforms,background_image,released, rating});
+    newVideogame.addGenres(genres)
     return newVideogame;
 }
 
