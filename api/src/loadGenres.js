@@ -858,11 +858,11 @@ const genres= [
       }
     ]
 
-const loadGenres= ()=>{
+const loadGenres= async()=>{
     try {
-        genres.map(genre=>{
+        genres.map(async(genre)=>{
             const name =  genre.name;
-            Genre.create({name})
+            await Genre.create({name})
             //console.log(name);
         })
     } catch (error) {

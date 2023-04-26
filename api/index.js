@@ -23,8 +23,8 @@ const {loadGenres}=require("./src/loadGenres.js")
 
 //Comento conexion BD
 // Syncing all the models at once.
-conn.sync({ force: true }).then(() => {
-  loadGenres();
+conn.sync({ alter: true }).then(() => {
+  //loadGenres();
   server.listen(3001, () => {
     console.log('listening in port 3001'); // eslint-disable-line no-console
   });

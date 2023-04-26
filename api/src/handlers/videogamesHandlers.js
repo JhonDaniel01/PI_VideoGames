@@ -1,14 +1,18 @@
-const {createVideogame}=require("../controllers/videogamesControllers")
+const {createVideogame,videogameId, findAllGames}=require("../controllers/videogamesControllers")
 
-const getVideogamesIdHandler= (req,res)=>{
+const getVideogamesIdHandler= async(req,res)=>{
     // Esta ruta obtiene el detalle de un videojuego específico. Es decir que devuelve un objeto con la información pedida en el detalle de un videojuego.
     // El videojuego es recibido por parámetro (ID).
     // Tiene que incluir los datos del género del videojuego al que está asociado.
     // Debe funcionar tanto para los videojuegos de la API como para los de la base de datos.
     
+    const {idVideogame}=req.params;
+    const source=isNaN(idVideogame)?"bdd":"api";
     try {
-        const {idVideogame}=req.params;
-        
+        console.log(source);
+        const detailVideogame= await videogameId(idVideogame,source);
+        console.log(detailVideogame);
+        res.status(200).json(detailVideogame);
     } catch (error) {
         res.status(400).json({error:error.message})
     }
@@ -16,18 +20,23 @@ const getVideogamesIdHandler= (req,res)=>{
 }
 
 
-const getVideogamesHandler = (req,res)=>{
-    const {name}=req.query;
-    if (name){
-        //     GET | /videogames/name?="..."
-        // Esta ruta debe obtener los primeros 15 videojuegos que se encuentren con la palabra recibida por query.
-        // Debe poder buscarlo independientemente de mayúsculas o minúsculas.
-        // Si no existe el videojuego, debe mostrar un mensaje adecuado.
-        // Debe buscar tanto los de la API como los de la base de datos.
-        res.send(`Esta ruta debe obtener los primeros 15 videojuegos que se encuentren con la palabra ${name}`)
-    } else{
-        //Obtiene un arreglo de objetos, donde cada objeto es un videojuego con su información.
-        res.send("Esta ruta trae los todos los video juegos")
+const getVideogamesHandler = async(req,res)=>{
+    try {
+        const {name}=req.query;
+        if (name){
+            //     GET | /videogames/name?="..."
+            // Esta ruta debe obtener los primeros 15 videojuegos que se encuentren con la palabra recibida por query.
+            // Debe poder buscarlo independientemente de mayúsculas o minúsculas.
+            // Si no existe el videojuego, debe mostrar un mensaje adecuado.
+            // Debe buscar tanto los de la API como los de la base de datos.
+            res.send(`Esta ruta debe obtener los primeros 15 videojuegos que se encuentren con la palabra ${name}`)
+        } else{
+            //Obtiene un arreglo de objetos, donde cada objeto es un videojuego con su información.
+            const videogames=await findAllGames();
+            res.status(200).json(videogames);
+        }
+    } catch (error) {
+        res.status(400).json({error:error.message})
     }
 }
 const postVideogamesHandler= async (req,res)=>{
