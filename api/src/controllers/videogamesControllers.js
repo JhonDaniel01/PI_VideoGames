@@ -11,18 +11,9 @@ const createVideogame=async(name,description,platforms,background_image,released
 }
 
 const videogameId=async(idVideogame,source)=>{
-    // let detailVideogame=[]
-    // fetch(`${URL}?key=${API_KEY}`)
-    // .then((response) => response.json())
-    // .then((data) => {
-    //     detailVideogame= [data.results];
-    // });
-    // const detailVideogame = await axios.get(`${URL}?key=${API_KEY}`);
-    // console.log(detailVideogame.data);
-    // return detailVideogame.data.results
     
     const detailVideogame= source==="api"
-        ?(await axios.get(`${URL}/${idVideogame}?key=${API_KEY}`)).data //https://api.rawg.io/api/games/{id}
+        ?(await axios.get(`${URL}/${idVideogame}?key=${API_KEY}`)).data 
         :await Videogame.findByPk(idVideogame)
     return detailVideogame;
 }
@@ -30,22 +21,32 @@ const videogameId=async(idVideogame,source)=>{
 const findAllGames=async(serchGenres="Action")=>{
     const gamesBd= await findAllGamesDB()
     const gamesApi=await findAllGamesApi()
-    const allVideogames=gamesBd.concat(gamesApi)
-    //allVideogames.sort((y, x) => x.rating - y.rating); //Ordenar rating mayor a menor
+    const allVideogames=await gamesBd.concat(gamesApi)
+    allVideogames.sort((y, x) => x.rating - y.rating); //Ordenar rating mayor a menor
     //allVideogames.sort((y, x) => y.rating - x.rating); //Ordenar rating menor a mayor
     //allVideogames.sort((x, y) => x.name.localeCompare(y.name)); //Ordenar nombre mayor a menor
     //allVideogames.sort((x, y) => y.name.localeCompare(x.name)); //Ordenar nombre menor a mayor
-    const filterGenre=allVideogames.filter(videogame=>{
-        for (let i = 0; i < videogame.genres.length; i++) {
-            if(videogame.genres[i].name==serchGenres)return true   
-        }
-    })
-    return filterGenre;
+    //console.log(gamesBd)
+
+    //Busca genero juegos Api
+    // const filterGenre= gamesApi.filter(videogame=>{
+    //     for (let i = 0; i < videogame.genres.length; i++) {
+    //         return (videogame.genres[i].name==serchGenres)
+    //     }
+    // })
+    return allVideogames;
 }
 const findAllGamesApi=async()=>{
     const videogamesApi=[];
-    const getApiInfo = await axios.get(`${URL}?key=${API_KEY}`);
-    const getVideogames=getApiInfo.data.results;
+    let urlGames=`${URL}?key=${API_KEY}`;
+    let getApiInfo = [];
+    let getVideogames=[]
+    
+    for (let i = 0; i < 5; i++) {
+        getApiInfo = await axios.get(urlGames);
+        urlGames=getApiInfo.data.next;
+        getVideogames=[...getVideogames,...getApiInfo.data.results];
+    }
     
     getVideogames.map((videogame)=>{
        videogamesApi.push({
@@ -61,6 +62,7 @@ const findAllGamesApi=async()=>{
 }
 const findAllGamesDB=async()=>{
     const videogames=await Videogame.findAll({
+        
         include:{
             model:Genre,
             attributes: ["name"], 
