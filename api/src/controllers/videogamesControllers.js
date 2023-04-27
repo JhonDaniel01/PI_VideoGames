@@ -1,5 +1,6 @@
 const axios =require ("axios")
 const {Videogame,Genre}=require("../db")
+const {findAllGamesApi,findAllGamesDB,findNameGame,filterGenreGame}=require("./findGames")
 require('dotenv').config();
 const {API_KEY} = process.env;
 const URL="https://api.rawg.io/api/games"
@@ -18,58 +19,42 @@ const videogameId=async(idVideogame,source)=>{
     return detailVideogame;
 }
 
-const findAllGames=async(serchGenres="Action")=>{
+const findAllGames=async(pag=1,filter,order,name,genre)=>{
     const gamesBd= await findAllGamesDB()
     const gamesApi=await findAllGamesApi()
-    const allVideogames=await gamesBd.concat(gamesApi)
-    allVideogames.sort((y, x) => x.rating - y.rating); //Ordenar rating mayor a menor
+    let allVideogames=await gamesBd.concat(gamesApi)
+    if (genre) allVideogames=await filterGenreGame(genre,gamesApi)
+    if (name) allVideogames=await findNameGame(name);
+    switch (filter) {
+        case "api":
+            allVideogames=gamesApi;
+            break;
+        case "bd":
+            allVideogames=gamesBd;
+            break;
+    }
+    switch (order) {
+       case "nameAsc":
+            allVideogames.sort((x, y) => y.name.localeCompare(x.name)); //Ordenar nombre menor a mayor
+            break;
+        case "nameDes":
+            allVideogames.sort((x, y) => x.name.localeCompare(y.name)); //Ordenar nombre mayor a menor
+            break;
+        case "ratingAsc":
+            allVideogames.sort((y, x) => y.rating - x.rating); //Ordenar rating menor a mayor
+            break;
+        case "ratingDes":
+            allVideogames.sort((y, x) => x.rating - y.rating); //Ordenar rating mayor a menor
+            break;
+    }
+    //allVideogames.sort((y, x) => x.rating - y.rating); //Ordenar rating mayor a menor
     //allVideogames.sort((y, x) => y.rating - x.rating); //Ordenar rating menor a mayor
     //allVideogames.sort((x, y) => x.name.localeCompare(y.name)); //Ordenar nombre mayor a menor
     //allVideogames.sort((x, y) => y.name.localeCompare(x.name)); //Ordenar nombre menor a mayor
-    //console.log(gamesBd)
-
-    //Busca genero juegos Api
-    // const filterGenre= gamesApi.filter(videogame=>{
-    //     for (let i = 0; i < videogame.genres.length; i++) {
-    //         return (videogame.genres[i].name==serchGenres)
-    //     }
-    // })
-    return allVideogames;
-}
-const findAllGamesApi=async()=>{
-    const videogamesApi=[];
-    let urlGames=`${URL}?key=${API_KEY}`;
-    let getApiInfo = [];
-    let getVideogames=[]
-    
-    for (let i = 0; i < 5; i++) {
-        getApiInfo = await axios.get(urlGames);
-        urlGames=getApiInfo.data.next;
-        getVideogames=[...getVideogames,...getApiInfo.data.results];
-    }
-    
-    getVideogames.map((videogame)=>{
-       videogamesApi.push({
-            id:videogame.id,
-            name:videogame.name,
-            released: videogame.released,
-            rating: videogame.rating,
-            background_image:videogame.background_image,
-            genres:videogame.genres
-        });
-    })
-    return videogamesApi;
-}
-const findAllGamesDB=async()=>{
-    const videogames=await Videogame.findAll({
+    //console.log(allVideogames)
         
-        include:{
-            model:Genre,
-            attributes: ["name"], 
-            through:{
-                attributes:[],
-            },
-        },});
-    return videogames;
+    return allVideogames.slice((pag*15)-15,(pag*15));//0-14 15-29 30-44
 }
+
+
 module.exports={createVideogame,videogameId,findAllGames}

@@ -20,19 +20,9 @@ const getVideogamesIdHandler= async(req,res)=>{
 
 const getVideogamesHandler = async(req,res)=>{
     try {
-        const {name}=req.query;
-        if (name){
-            //     GET | /videogames/name?="..."
-            // Esta ruta debe obtener los primeros 15 videojuegos que se encuentren con la palabra recibida por query.
-            // Debe poder buscarlo independientemente de mayúsculas o minúsculas.
-            // Si no existe el videojuego, debe mostrar un mensaje adecuado.
-            // Debe buscar tanto los de la API como los de la base de datos.
-            res.send(`Esta ruta debe obtener los primeros 15 videojuegos que se encuentren con la palabra ${name}`)
-        } else{
-            //Obtiene un arreglo de objetos, donde cada objeto es un videojuego con su información.
-            const videogames=await findAllGames();
-            res.status(200).json(videogames);
-        }
+        const {page,filter,order,name,genre}=req.query;
+        const videogames=await findAllGames(page,filter,order,name,genre);
+        res.status(200).json(videogames);
     } catch (error) {
         res.status(400).json({error:error.message})
     }
